@@ -29,8 +29,7 @@ type VP8DataTunnel struct {
 	stopCh     chan struct{}
 	sendQueue  chan []byte
 	onData     func([]byte)
-	onClose    func()
-	throttle   bool
+	onClose func()
 }
 
 func NewVP8DataTunnel(track *webrtc.TrackLocalStaticSample, logFn func(string, ...any)) *VP8DataTunnel {
@@ -112,16 +111,12 @@ func (t *VP8DataTunnel) Start(fps int) {
 				lastSend = time.Now()
 				frame := t.buildFrame(nil)
 				err := t.track.WriteSample(media.Sample{Data: frame, Duration: keepaliveInterval})
-				if t.frameCount <= 3 || t.frameCount%250 == 0 {
+				if t.frameCount <= 3 || t.frameCount%500 == 0 {
 					t.logFn("vp8tunnel: KEEPALIVE frame=%d first=0x%02x err=%v", t.frameCount-1, frame[0], err)
 				}
 			}
 		}
 	}()
-}
-
-func (t *VP8DataTunnel) SetThrottle(on bool) {
-	t.throttle = on
 }
 
 func (t *VP8DataTunnel) Stop() {

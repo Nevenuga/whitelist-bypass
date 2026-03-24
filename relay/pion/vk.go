@@ -67,6 +67,7 @@ func (c *VKClient) handleICEServers(data json.RawMessage) {
 	if c.pc != nil {
 		return
 	}
+	iceLogFn = c.logFn
 	iceServers, err := ParseICEServers(data)
 	if err != nil {
 		return
@@ -110,7 +111,7 @@ func (c *VKClient) handleICEServers(data json.RawMessage) {
 			c.logFn("vk: ICE gathering complete (nil candidate)")
 			return
 		}
-		c.logFn("vk: ICE candidate: type=%s protocol=%s address=%s", cand.Typ.String(), cand.Protocol.String(), cand.Address)
+		c.logFn("vk: ICE candidate: type=%s protocol=%s address=%s", cand.Typ.String(), cand.Protocol.String(), maskAddr(cand.Address))
 		c.SendToHook("ice-candidate", cand.ToJSON())
 	})
 
